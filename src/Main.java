@@ -1,6 +1,7 @@
 public class Main {
     public static void main(String[] args) {
 
+
         Assignment assignment = new Assignment("A2", "Java");
 
         String randomStudentId = "20200602015";

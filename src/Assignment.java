@@ -72,6 +72,7 @@ public class Assignment {
 
     private boolean runExecutableWithParameters(String submissionPath) {
         try {
+
             // Get the directory path from the submission path
             int lastSeparatorIndex = submissionPath.lastIndexOf(File.separator);
             if (lastSeparatorIndex == -1) {
