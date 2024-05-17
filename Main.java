@@ -1,13 +1,11 @@
 import java.util.Scanner;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.*;
 
 public class Main {
     public static void main(String[] args) {
         Result result = new Result();
+
+        Stage stage=new Stage();
 
         // Create main configurations for Java, C, and Python
         Configuration mainConfiguration = new Configuration();
@@ -41,15 +39,15 @@ public class Main {
         String status = "unknown";
 
         if (choice == 1) {
-                // Create a new Project with an existing configuration
-                System.out.println("Which language would you like to use: (Java-C-Python): ");
-                scanner.nextLine();
-                String language = scanner.nextLine();
+            // Create a new Project with an existing configuration
+            System.out.println("Which language would you like to use: (Java-C-Python): ");
+            scanner.nextLine();
+            String language = scanner.nextLine();
             switch (language.toLowerCase()) {
                 case "java" -> {
                     myProject.createProjectWithExistingConfiguration(mainConfiguration.getConfigurations().get("java"), "java");
                     String randomStudentId = "20200602015";
-                    String randomSubmissionPath = "C:\\Users\\Koray\\Desktop\\Test\\src\\test.java";
+                    String randomSubmissionPath = "test.java";
 
                     System.out.println("Please enter the expected file's absolute path: ");
                     String projectPath = scanner.nextLine();
@@ -68,13 +66,13 @@ public class Main {
                         status = "Failed";
                     }
                     result.addReport(randomStudentId,status);
-                    result.displayReports();
+                    result.displayReports(stage);
                     break;
                 }
                 case "c" -> {
                     myProject.createProjectWithExistingConfiguration(mainConfiguration.getConfigurations().get("c"), "c");
                     String randomStudentId = "20200602041";
-                    String randomSubmissionPath = "C:\\Users\\Koray\\Desktop\\c_submission\\test.c"; // Replace with actual path later
+                    String randomSubmissionPath = "test.c"; // Replace with actual path later
 
                     System.out.println("Please enter the expected file's absolute path: ");
                     String projectPath = scanner.nextLine();
@@ -94,13 +92,13 @@ public class Main {
                         status = "Failed";
                     }
                     result.addReport(randomStudentId,status);
-                    result.displayReports();
+                    result.displayReports(stage);
                     break;
                 }
                 case "python" -> {
                     myProject.createProjectWithExistingConfiguration(mainConfiguration.getConfigurations().get("python"), "python");
                     String randomStudentId = "20200602052";
-                    String randomSubmissionPath = "C:\\Users\\Koray\\Desktop\\pythontest\\main.py"; // Replace with actual path later
+                    String randomSubmissionPath = "main.py"; // Replace with actual path later
 
                     System.out.println("Please enter the expected file's absolute path: ");
                     String projectPath = scanner.nextLine();
@@ -112,26 +110,80 @@ public class Main {
                     myProject.getAssignments().get(2).evaluateStudentSubmissions();
 
                     System.out.println("--------------------------------------------------------------");
-                    if (myProject.getAssignments().get(1).isSuccess()){
+                    if (myProject.getAssignments().get(2).isSuccess()){
                         status = "Successed";
                     }
                     else{
                         status = "Failed";
                     }
                     result.addReport(randomStudentId,status);
-                    result.displayReports();
+                    result.displayReports(stage);
                     break;
                 }
                 default -> System.out.println("Invalid Language...");
             }
         } else if (choice == 2) {
             // Create a new Project without an existing configuration
-            myProject.createProjectWithoutExistingConfiguration();
+            Scanner input = new Scanner(System.in);
 
-            // Test adding student submissions
-            String randomStudentId = "20200602015";
-            String randomSubmissionPath = "C:\\Users\\Koray\\Desktop\\Test\\src\\test.java"; // Replace with actual path later
-            myProject.getAssignments().get(0).addStudentSubmission(new StudentSubmission(randomStudentId, randomSubmissionPath));
+            // Prompt the user to enter configuration details
+            System.out.println("Enter configuration name:");
+            String configName = input.nextLine();
+
+            System.out.println("Enter compiler path:");
+            String compilePath = input.nextLine();
+
+            System.out.println("Enter compiler parameters (or leave empty if none):");
+            String compileParameters = input.nextLine();
+
+            System.out.println("Enter execution method:");
+            String executionMethod = input.nextLine();
+
+            // Create a new Configuration object with the provided details
+            Configuration newConfig = new Configuration();
+            if (compileParameters == null){
+                newConfig.createConfigurationWithoutParameter(configName, compilePath, executionMethod);
+                newConfig.setName(configName);
+                newConfig.setCompilerPath(compilePath);
+                newConfig.setCompilerParameters(compileParameters);
+                newConfig.setExecutionMethod(executionMethod);
+            }
+            else{
+                newConfig.createConfigurationWithParameter(configName, compilePath, compileParameters, executionMethod);
+                newConfig.setName(configName);
+                newConfig.setCompilerPath(compilePath);
+                newConfig.setCompilerParameters(compileParameters);
+                newConfig.setExecutionMethod(executionMethod);
+            }
+
+            Assignment assignment4 = new Assignment("A5", configName);
+            assignment4.addConfiguration(newConfig.getConfigurations().get(configName));
+            myProject.addAssignment(assignment4);
+
+
+            System.out.println("Please enter the student ID: ");
+            String randomStudentId = input.nextLine();
+            System.out.println("Please enter the file path: ");
+            String randomSubmissionPath = input.nextLine();
+
+            System.out.println("Please enter the expected file's absolute path: ");
+            String projectPath = scanner.nextLine();
+            myProject.setProjectPath(projectPath);
+            myProject.getAssignments().get(3).setProjectManagerPath(projectPath);
+
+            myProject.getAssignments().get(3).addStudentSubmission(new StudentSubmission(randomStudentId, randomSubmissionPath));
+
+            myProject.getAssignments().get(3).evaluateRandom();
+
+            System.out.println("--------------------------------------------------------------");
+            if (myProject.getAssignments().get(3).isSuccess()){
+                status = "Successed";
+            }
+            else{
+                status = "Failed";
+            }
+            result.addReport(randomStudentId,status);
+            result.displayReports(stage);
         } else {
             System.out.println("Invalid choice.");
         }

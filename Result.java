@@ -1,9 +1,7 @@
 import java.util.HashMap;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import java.util.Stack;
+
+import javafx.*;
 
 public class Result {
     private HashMap<String, String> reports;
@@ -30,13 +28,24 @@ public class Result {
         reports.put(studentID, status);
     }
 
-    public void displayReports() {
-        System.out.println("StudentID\tSuccess");
-        System.out.println();
+    public void displayReports(Stage stage) {
+        Text text=new Text();
+        text.setText("StudentID\tSuccess");
+        StackPane root=new StackPane();
+        Scene scene=new Scene(root, 300, 400);
+        root.getChildren().add(text);
+        Text text2=new Text();
+        text2.setText();
+        root.getChildren().add(text2);
         for (String studentID : reports.keySet()) {
+            Text text3=new Text();
             String success = reports.get(studentID);
-            System.out.println(studentID + "\t" + success);
+            text3.setText(studentID + "\t" + success);
+            root.getChildren().add(text3);
         }
+        stage.setScene(scene);
+        stage.setTitle("Result");
+        stage.show();
     }
 
     public HashMap<String, String> getReports() {
