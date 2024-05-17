@@ -1,11 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.*;
 
 public class Project {
 
@@ -67,7 +63,6 @@ public class Project {
         }
 
         // Add the provided configuration to the new Project
-        loadScene("java");
 
 
         // Optionally, you can add more assignments or configurations here
@@ -100,6 +95,7 @@ public class Project {
         }
 
 
+
         // Create a new Project with the given project ID
         Project newProject = new Project(projectID);
         System.out.println("Which language do you want to use: ");
@@ -109,26 +105,8 @@ public class Project {
         newProject.addAssignment(new Assignment("Assignment1", language));
 
         // Optionally, you can add more assignments or configurations here
-        loadScene("java");
 
         // Close the scanner to prevent resource leak
         scanner.close();
-    }
-
-    private void loadScene(String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            mainStage.setScene(scene);
-            mainStage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Failed to load the screen");
-            alert.setContentText("There was an error loading the screen: " + fxmlPath);
-            alert.showAndWait();
-        }
     }
 }

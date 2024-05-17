@@ -2,11 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.*;
 
 public class Assignment {
     private String assignmentId;
@@ -106,6 +102,37 @@ public class Assignment {
             }
             else{
                 System.out.println("Invalid language is given.Please restart the program and enter a valid language.");
+            }
+
+        }
+
+    }
+
+
+    public void evaluateRandom(){
+        for (StudentSubmission submission : studentSubmissions) {
+
+
+
+            boolean compilationSuccess = randomCompileSourceCode(submission.getSubmissionPath());
+            if (!compilationSuccess) {
+                System.out.println("Compilation failed for student ID: " + submission.getStudentId());
+                continue;
+            }
+
+            boolean executionSuccess = randomRunExecutableWithParameters(submission.getSubmissionPath());
+            if (!executionSuccess) {
+                System.out.println("Execution failed for student ID: " + submission.getStudentId());
+                continue;
+            }
+
+            boolean outputCorrect = randomCompareOutputWithExpected();
+            if (outputCorrect) {
+                System.out.println("Submission passed for student ID: " + submission.getSubmissionId());
+                success = true;
+            } else {
+                System.out.println("Submission failed for student ID: " + submission.getSubmissionId());
+                success = false;
             }
 
         }
@@ -272,21 +299,6 @@ public class Assignment {
     private boolean javaRunExecutableWithParameters(String submissionPath) {
         try {
 
-            // Get the directory path from the submission path
-            int lastSeparatorIndex = submissionPath.lastIndexOf(File.separator);
-            if (lastSeparatorIndex == -1) {
-                System.out.println("Invalid submission path: " + submissionPath);
-                return false;
-            }
-            String directoryPath = submissionPath.substring(0, lastSeparatorIndex);
-
-            // Prepare the command to change the directory
-            String changeDirectoryCommand = "cmd /c cd " + directoryPath;
-
-            // Execute the change directory command
-            Process changeDirProcess = Runtime.getRuntime().exec(changeDirectoryCommand);
-            changeDirProcess.waitFor(); // Wait for the directory change to complete
-
             Configuration config = assingnmentConfigurations.get(0);
 
             // Prepare the command to run the Java program
@@ -436,6 +448,120 @@ public class Assignment {
     private boolean pythonCompareOutputWithExpected() {
 
         String outputPath = "python_output.txt"; // Example path to actual output file
+        String expectedPath = projectManagerPath; // Example path to expected output file
+
+        try (BufferedReader outputReader = new BufferedReader(new FileReader(outputPath));
+             BufferedReader expectedReader = new BufferedReader(new FileReader(expectedPath))) {
+
+            String outputLine;
+            String expectedLine = null;
+
+            while ((outputLine = outputReader.readLine()) != null && (expectedLine = expectedReader.readLine()) != null) {
+                if (!outputLine.equals(expectedLine)) {
+                    System.out.println("Output does not match expected output.");
+                    success = false;
+                    return false;
+                }
+            }
+            outputLine = outputReader.readLine();
+            expectedLine = expectedReader.readLine();
+
+            if (outputLine != null || expectedLine != null) {
+                System.out.println("Output does not match expected output.");
+                success = false;
+                return false;
+            }
+
+            System.out.println("Output matches expected output.");
+            success = true;
+            return true;
+
+        } catch (IOException e) {
+            System.out.println("Error comparing output with expected: " + e.getMessage());
+            success = false;
+            return false;
+        }
+    }
+
+    private boolean randomCompileSourceCode(String submissionPath) {
+        try {
+
+            Configuration config = assingnmentConfigurations.get(0);
+
+
+            String compilerPath = config.getCompilerPath(); // Compiler path from configuration
+            String compilerParameters = config.getCompilerParameters(); // Compiler parameters from configuration
+            String compileCommand;
+
+            if (config.getCompilerParameters() == null){
+                compileCommand = compilerPath + " " + submissionPath;
+            }
+            else{
+                compileCommand = compilerPath + " " + submissionPath + " " + compilerParameters;
+            }
+
+            Process compileProcess = Runtime.getRuntime().exec(compileCommand);
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(compileProcess.getErrorStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line); // Print compiler output (e.g., errors)
+            }
+
+            int compileExitValue = compileProcess.waitFor();
+
+            if (compileExitValue == 0) {
+                System.out.println("Compilation successful.");
+                return true;
+            } else {
+                System.out.println("Compilation failed.");
+                return false;
+            }
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error during compilation: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean randomRunExecutableWithParameters(String submissionPath) {
+        try {
+
+            Configuration config = assingnmentConfigurations.get(0);
+
+            // Prepare the command to run the Java program
+            String command = config.getCompilerPath()+ " " + submissionPath;
+
+            // Execute the command in the command prompt
+            Process executionProcess = Runtime.getRuntime().exec("cmd /c " + command);
+
+            // Capture and print program output
+            BufferedReader reader = new BufferedReader(new InputStreamReader(executionProcess.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line); // Print program output (e.g., results)
+            }
+
+            // Wait for the program execution to complete
+            int executionExitValue = executionProcess.waitFor();
+
+            // Check the execution result
+            if (executionExitValue == 0) {
+                System.out.println("Execution successful.");
+                return true;
+            } else {
+                System.out.println("Execution failed.");
+                return false;
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Error during execution: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean randomCompareOutputWithExpected() {
+
+        String outputPath = "random_output.txt"; // Example path to actual output file
         String expectedPath = projectManagerPath; // Example path to expected output file
 
         try (BufferedReader outputReader = new BufferedReader(new FileReader(outputPath));
