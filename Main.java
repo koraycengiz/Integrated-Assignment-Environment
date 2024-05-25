@@ -7,6 +7,11 @@ public class Main {
 
         Stage stage=new Stage();
 
+        Installer installer=new Installer();
+
+        installer.showSplashScreen();
+        installer.showBrowser();
+
         // Create main configurations for Java, C, and Python
         Configuration mainConfiguration = new Configuration();
         Configuration mainConfiguration_c = new Configuration();
